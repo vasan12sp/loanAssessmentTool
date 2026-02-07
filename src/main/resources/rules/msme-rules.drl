@@ -1,0 +1,1192 @@
+package rules;
+
+import com.vasan.loanAssessmentTool.model.Applicant;
+import com.vasan.loanAssessmentTool.model.Financials;
+import com.vasan.loanAssessmentTool.model.Collateral;
+import com.vasan.loanAssessmentTool.model.RiskManagement;
+import com.vasan.loanAssessmentTool.model.WorkingCapital;
+import com.vasan.loanAssessmentTool.model.Explanation;
+import com.vasan.loanAssessmentTool.model.RiskScoringModel;
+import java.util.List;
+import java.util.ArrayList;
+
+
+
+// ============================================================
+// HELPER FUNCTION
+// ============================================================
+function double normalizeScore(double value, double min, double max) {
+    if (value <= min) return 0.0;
+    if (value >= max) return 100.0;
+    return ((value - min) / (max - min)) * 100.0;
+}
+
+// ============================================================
+// SECTION 1: FINANCIAL CALCULATION RULES (Salience 100)
+// ============================================================
+
+rule "Calculate_Current_Ratio"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentAssets > 0, currentLiabilities > 0)
+        $explanation : Explanation()
+    then
+        double cr = $financials.getCurrentAssets() / $financials.getCurrentLiabilities();
+        modify($financials) { setCurrentRatio(cr) }
+        $explanation.addSection("Calculated Current Ratio: " + String.format("%.2f", cr));
+        System.out.println("Calculated Current Ratio: " + cr);
+end
+
+rule "Calculate_Quick_Ratio"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentAssets > 0, inventory > 0, currentLiabilities > 0)
+        $explanation : Explanation()
+    then
+        double quickAssets = $financials.getCurrentAssets() - $financials.getInventory();
+        double qr = quickAssets / $financials.getCurrentLiabilities();
+        modify($financials) { setQuickRatio(qr) }
+        $explanation.addSection("Calculated Quick Ratio: " + String.format("%.2f", qr));
+        System.out.println("Calculated Quick Ratio: " + qr);
+end
+
+rule "Calculate_DSCR"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(netOperatingIncome > 0, annualDebtService > 0)
+        $explanation : Explanation()
+    then
+        double dscr = $financials.getNetOperatingIncome() / $financials.getAnnualDebtService();
+        modify($financials) { setDscr(dscr) }
+        $explanation.addSection("Calculated DSCR: " + String.format("%.2f", dscr));
+        System.out.println("Calculated DSCR: " + dscr);
+end
+
+rule "Calculate_Debt_to_Equity"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(totalLiabilities > 0, netWorth > 0)
+        $explanation : Explanation()
+    then
+        double deRatio = $financials.getTotalLiabilities() / $financials.getNetWorth();
+        modify($financials) { setDebtToEquityRatio(deRatio) }
+        $explanation.addSection("Calculated D/E Ratio: " + String.format("%.2f", deRatio));
+        System.out.println("Calculated D/E Ratio: " + deRatio);
+end
+
+rule "Calculate_Net_Profit_Margin"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(netSales > 0)
+        $explanation : Explanation()
+    then
+        double npm = ($financials.getNetProfitAfterTax() / $financials.getNetSales()) * 100;
+        modify($financials) { setNetProfitMargin(npm) }
+        $explanation.addSection("Calculated NPM: " + String.format("%.2f", npm) + "%");
+        System.out.println("Calculated NPM: " + npm + "%");
+end
+
+rule "Calculate_Interest_Coverage_Ratio"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(ebit > 0, interestExpense > 0)
+        $explanation : Explanation()
+    then
+        double icr = $financials.getEbit() / $financials.getInterestExpense();
+        modify($financials) { setInterestCoverageRatio(icr) }
+        $explanation.addSection("Calculated Interest Coverage Ratio: " + String.format("%.2f", icr));
+        System.out.println("Calculated Interest Coverage Ratio: " + icr);
+end
+
+rule "Calculate_Working_Capital_Turnover_Method"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(projectedAnnualTurnover > 0, digitalTransactionPercentage < 20)
+        $explanation : Explanation()
+    then
+        double wcRequirement = 0.20 * $financials.getProjectedAnnualTurnover();
+        double borrowerMargin = 0.20 * wcRequirement;
+        double bankContribution = 0.80 * wcRequirement;
+        modify($financials) {
+            setWcRequirement(wcRequirement),
+            setBorrowerMargin(borrowerMargin),
+            setBankContribution(bankContribution),
+            setWcCalculationMethod("TURNOVER_METHOD")
+        }
+        $explanation.addSection("WC Requirement: " + String.format("%.2f", wcRequirement));
+        System.out.println("WC Requirement: " + wcRequirement);
+end
+
+rule "Calculate_Working_Capital_Digital_Enhanced"
+    salience 100
+    when
+        $applicant : Applicant()
+        $financials : Financials(projectedAnnualTurnover > 0, digitalTransactionPercentage >= 20)
+        $explanation : Explanation()
+    then
+        double wcRequirement = 0.30 * $financials.getProjectedAnnualTurnover();
+        modify($financials) {
+            setWcRequirement(wcRequirement),
+            setWcCalculationMethod("DIGITAL_ENHANCED")
+        }
+        $explanation.addSection("WC Requirement (Digital Enhanced): " + String.format("%.2f", wcRequirement));
+        System.out.println("WC Requirement (Digital Enhanced): " + wcRequirement);
+end
+
+// ============================================================
+// SECTION 2: LIQUIDITY ASSESSMENT RULES (Salience 90)
+// ============================================================
+
+rule "Assess_Liquidity_Status_Satisfactory"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentRatio >= 1.33)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setLiquidityStatus("SATISFACTORY"),
+            setWorkingCapital("ADEQUATE"),
+            setLiquidityRisk("LOW")
+        }
+        $explanation.addSection("Liquidity Status: SATISFACTORY");
+        System.out.println("Liquidity Status: SATISFACTORY");
+end
+
+rule "Assess_Liquidity_Status_Good"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentRatio >= 1.25, currentRatio < 1.33)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setLiquidityStatus("GOOD"),
+            setWorkingCapital("ACCEPTABLE"),
+            setLiquidityRisk("LOW")
+        }
+        $explanation.addSection("Liquidity Status: GOOD");
+        System.out.println("Liquidity Status: GOOD");
+end
+
+rule "Assess_Liquidity_Status_Tight"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentRatio >= 1.0, currentRatio < 1.25)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setLiquidityStatus("TIGHT"),
+            setWorkingCapital("CONSTRAINED"),
+            setLiquidityRisk("MODERATE")
+        }
+        $explanation.addSection("Liquidity Status: TIGHT");
+        System.out.println("Liquidity Status: TIGHT");
+end
+
+rule "Assess_Liquidity_Status_Critical_Deficit"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentRatio > 0, currentRatio < 1.0)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setLiquidityStatus("CRITICAL_DEFICIT"),
+            setWorkingCapital("NEGATIVE"),
+            setLiquidityRisk("HIGH")
+        }
+        $explanation.addSection("Liquidity Status: CRITICAL_DEFICIT");
+        System.out.println("Liquidity Status: CRITICAL_DEFICIT");
+end
+
+// ============================================================
+// SECTION 3: SOLVENCY ASSESSMENT RULES (Salience 90)
+// ============================================================
+
+rule "Assess_Repayment_Capacity_Excellent"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(dscr >= 1.5)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setRepaymentCapacity("EXCELLENT"),
+            setApprovalLikelihood("HIGH")
+        }
+        $explanation.addSection("Repayment Capacity: EXCELLENT (DSCR >= 1.5)");
+        System.out.println("Repayment Capacity: EXCELLENT (DSCR >= 1.5)");
+end
+
+rule "Assess_Repayment_Capacity_Good"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(dscr >= 1.25, dscr < 1.5)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setRepaymentCapacity("GOOD"),
+            setApprovalLikelihood("MODERATE_HIGH")
+        }
+        $explanation.addSection("Repayment Capacity: GOOD (DSCR 1.25-1.5)");
+        System.out.println("Repayment Capacity: GOOD (DSCR 1.25-1.5)");
+end
+
+rule "Assess_Repayment_Capacity_Acceptable"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(dscr >= 1.0, dscr < 1.25)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setRepaymentCapacity("ACCEPTABLE_WITH_CAUTION"),
+            setApprovalLikelihood("CONDITIONAL")
+        }
+        $explanation.addSection("Repayment Capacity: ACCEPTABLE_WITH_CAUTION (DSCR 1.0-1.24)");
+        System.out.println("Repayment Capacity: ACCEPTABLE_WITH_CAUTION (DSCR 1.0-1.24)");
+end
+
+rule "Assess_Solvency_Status_Conservative"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(debtToEquityRatio > 0, debtToEquityRatio <= 1.5)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setSolvencyStatus("CONSERVATIVE"),
+            setSolvencyRisk("LOW")
+        }
+        $explanation.addSection("Solvency Status: CONSERVATIVE (D/E <= 1.5)");
+        System.out.println("Solvency Status: CONSERVATIVE (D/E <= 1.5)");
+end
+
+rule "Assess_Solvency_Status_Moderate"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(debtToEquityRatio > 1.5, debtToEquityRatio <= 2.0)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setSolvencyStatus("MODERATE"),
+            setSolvencyRisk("MODERATE")
+        }
+        $explanation.addSection("Solvency Status: MODERATE (D/E 1.5-2.0)");
+        System.out.println("Solvency Status: MODERATE (D/E 1.5-2.0)");
+end
+
+rule "Assess_Solvency_Status_High_Leverage"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(debtToEquityRatio > 2.0, debtToEquityRatio <= 2.5)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setSolvencyStatus("HIGH_LEVERAGE"),
+            setSolvencyRisk("HIGH")
+        }
+        $explanation.addSection("Solvency Status: HIGH_LEVERAGE (D/E 2.0-2.5)");
+        System.out.println("Solvency Status: HIGH_LEVERAGE (D/E 2.0-2.5)");
+end
+
+rule "Assess_Solvency_Status_Excessive"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(debtToEquityRatio > 2.5)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setSolvencyStatus("EXCESSIVE_LEVERAGE"),
+            setSolvencyRisk("VERY_HIGH")
+        }
+        $explanation.addSection("Solvency Status: EXCESSIVE_LEVERAGE (D/E > 2.5)");
+        System.out.println("Solvency Status: EXCESSIVE_LEVERAGE (D/E > 2.5)");
+end
+
+// ============================================================
+// SECTION 4: PROFITABILITY ASSESSMENT RULES (Salience 90)
+// ============================================================
+
+rule "Assess_Profitability_Healthy"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(netProfitMargin > 8.0)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setProfitability("HEALTHY"),
+            setEfficiency("GOOD")
+        }
+        $explanation.addSection("Profitability: HEALTHY (NPM > 8%)");
+        System.out.println("Profitability: HEALTHY (NPM > 8%)");
+end
+
+rule "Assess_Profitability_Satisfactory"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(netProfitMargin >= 3.0, netProfitMargin <= 8.0)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setProfitability("SATISFACTORY"),
+            setEfficiency("ACCEPTABLE")
+        }
+        $explanation.addSection("Profitability: SATISFACTORY (NPM 3-8%)");
+        System.out.println("Profitability: SATISFACTORY (NPM 3-8%)");
+end
+
+rule "Assess_Profitability_Concern"
+    salience 90
+    when
+        $applicant : Applicant()
+        $financials : Financials(netProfitMargin < 3.0)
+        $explanation : Explanation()
+    then
+        modify($financials) {
+            setProfitability("CONCERN"),
+            setEfficiency("POOR")
+        }
+        $explanation.addSection("Profitability: CONCERN (NPM < 3%)");
+        System.out.println("Profitability: CONCERN (NPM < 3%)");
+end
+
+// ============================================================
+// SECTION 5: RISK SYNTHESIS RULES (Salience 70)
+// ============================================================
+
+rule "Calculate_Weighted_Risk_Score_Enhanced"
+    salience 70
+    when
+        $applicant : Applicant()
+        $financials : Financials(dscr > 0, currentRatio > 0)
+        $riskScoringModel : RiskScoringModel()
+        $explanation : Explanation()
+    then
+        double dscrScore = normalizeScore($financials.getDscr(), 1.0, 2.0);
+        double liquidityScore = normalizeScore($financials.getCurrentRatio(), 1.0, 1.5);
+        double managementScore = normalizeScore($applicant.getPromoterExperience(), 0, 15);
+        double collateralScore = normalizeScore($applicant.getCollateralCoverage(), 0.50, 1.2);
+        double profitScore = normalizeScore($financials.getNetProfitMargin(), 2.0, 10.0);
+
+        double totalRiskScore = (dscrScore * 0.35) +
+                                (liquidityScore * 0.20) +
+                                (managementScore * 0.20) +
+                                (collateralScore * 0.15) +
+                                (profitScore * 0.10);
+
+        modify($riskScoringModel) {
+            setWeightedRiskScore(totalRiskScore),
+            setDscrScore(dscrScore),
+            setLiquidityScore(liquidityScore),
+            setManagementScore(managementScore),
+            setCollateralScore(collateralScore)
+        }
+        $explanation.addSection("Weighted Risk Score (Enhanced): " + String.format("%.2f", totalRiskScore) + "/100");
+        System.out.println("Weighted Risk Score (Enhanced): " + totalRiskScore + "/100");
+end
+
+rule "Set_Risk_Category_Low"
+    salience 69
+    when
+        $riskScoringModel : RiskScoringModel(weightedRiskScore >= 80)
+        $financials : Financials()
+        $explanation : Explanation()
+    then
+        modify($financials) { setOverallFinancialRisk("LOW") }
+        $explanation.addSection("Risk Category (Weighted): LOW");
+        System.out.println("Risk Category (Weighted): LOW");
+end
+
+rule "Set_Risk_Category_Moderate"
+    salience 69
+    when
+        $riskScoringModel : RiskScoringModel(weightedRiskScore >= 60, weightedRiskScore < 80)
+        $financials : Financials()
+        $explanation : Explanation()
+    then
+        modify($financials) { setOverallFinancialRisk("MODERATE") }
+        $explanation.addSection("Risk Category (Weighted): MODERATE");
+        System.out.println("Risk Category (Weighted): MODERATE");
+end
+
+rule "Set_Risk_Category_High"
+    salience 69
+    when
+        $riskScoringModel : RiskScoringModel(weightedRiskScore >= 40, weightedRiskScore < 60)
+        $financials : Financials()
+        $explanation : Explanation()
+    then
+        modify($financials) { setOverallFinancialRisk("HIGH") }
+        $explanation.addSection("Risk Category (Weighted): HIGH");
+        System.out.println("Risk Category (Weighted): HIGH");
+end
+
+rule "Set_Risk_Category_Very_High"
+    salience 69
+    when
+        $riskScoringModel : RiskScoringModel(weightedRiskScore < 40)
+        $financials : Financials()
+        $explanation : Explanation()
+    then
+        modify($financials) { setOverallFinancialRisk("VERY_HIGH") }
+        $explanation.addSection("Risk Category (Weighted): VERY_HIGH");
+        System.out.println("Risk Category (Weighted): VERY_HIGH");
+end
+
+// ============================================================
+// SECTION 5B: BLOCKER RULES (Salience 65)
+// ============================================================
+
+rule "Block_DSCR_Below_Minimum"
+    salience 65
+    when
+        $applicant : Applicant(finalDecision == null)
+        $financials : Financials(dscr > 0, dscr < 0.80)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRejectionReason("AUTO_REJECT: CRITICAL_DSCR_BELOW_0.80"),
+            setRiskCategory("VERY_HIGH")
+        }
+        modify($financials) { setOverallFinancialRisk("VERY_HIGH") }
+        $explanation.addSection("BLOCKER TRIGGERED: DSCR < 0.80");
+        System.out.println("BLOCKER TRIGGERED: DSCR < 0.80");
+end
+
+rule "Block_Interest_Coverage"
+    salience 65
+    when
+        $applicant : Applicant(finalDecision == null)
+        $financials : Financials(interestCoverageRatio > 0, interestCoverageRatio < 1.0)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRejectionReason("AUTO_REJECT: INSUFFICIENT_INTEREST_COVERAGE"),
+            setRiskCategory("VERY_HIGH")
+        }
+        $explanation.addSection("BLOCKER TRIGGERED: ICR < 1.0");
+        System.out.println("BLOCKER TRIGGERED: ICR < 1.0");
+end
+
+rule "Block_High_Leverage"
+    salience 65
+    when
+        $applicant : Applicant(finalDecision == null)
+        $financials : Financials(debtToEquityRatio > 2.5)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRejectionReason("AUTO_REJECT: EXCESSIVE_LEVERAGE"),
+            setRiskCategory("VERY_HIGH")
+        }
+        $explanation.addSection("BLOCKER TRIGGERED: D/E > 2.5");
+        System.out.println("BLOCKER TRIGGERED: D/E > 2.5");
+end
+
+rule "Block_Liquidity_Critical"
+    salience 65
+    when
+        $applicant : Applicant(finalDecision == null)
+        $financials : Financials(currentRatio > 0, currentRatio < 0.75)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRejectionReason("AUTO_REJECT: CRITICAL_LIQUIDITY_DEFICIT"),
+            setRiskCategory("VERY_HIGH")
+        }
+        $explanation.addSection("BLOCKER TRIGGERED: Current Ratio < 0.75");
+        System.out.println("BLOCKER TRIGGERED: Current Ratio < 0.75");
+end
+
+rule "Block_Negative_Margins"
+    salience 65
+    when
+        $applicant : Applicant(finalDecision == null)
+        $financials : Financials(netProfitMargin < -1.0)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRejectionReason("AUTO_REJECT: NEGATIVE_PROFITABILITY"),
+            setRiskCategory("VERY_HIGH")
+        }
+        $explanation.addSection("BLOCKER TRIGGERED: NPM < -1.0%");
+        System.out.println("BLOCKER TRIGGERED: NPM < -1.0%");
+end
+
+// ============================================================
+// SECTION 6: MANAGEMENT QUALITY RULES (Salience 90)
+// ============================================================
+
+rule "Assess_Management_Quality_Strong"
+    salience 90
+    when
+        $applicant : Applicant(
+            promoterExperience >= 10,
+            priorSuccess == true,
+            paymentHistory == "EXCELLENT"
+        )
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setManagementQuality("STRONG"),
+            setManagementRisk("LOW")
+        }
+        $explanation.addSection("Management Quality: STRONG");
+        System.out.println("Management Quality: STRONG");
+end
+
+rule "Assess_Management_Quality_Satisfactory"
+    salience 90
+    when
+        $applicant : Applicant(
+            promoterExperience >= 5,
+            promoterExperience < 10,
+            priorSuccess == true,
+            paymentHistory == "GOOD" || paymentHistory == "EXCELLENT"
+        )
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setManagementQuality("SATISFACTORY"),
+            setManagementRisk("MODERATE")
+        }
+        $explanation.addSection("Management Quality: SATISFACTORY");
+        System.out.println("Management Quality: SATISFACTORY");
+end
+
+rule "Assess_Management_Quality_Weak"
+    salience 90
+    when
+        $applicant : Applicant(promoterExperience < 5 || paymentHistory == "POOR" || priorDefaults > 0)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setManagementQuality("WEAK"),
+            setManagementRisk("HIGH")
+        }
+        $explanation.addSection("Management Quality: WEAK (Experience/History/Defaults)");
+        System.out.println("Management Quality: WEAK (Experience/History/Defaults)");
+end
+
+// ============================================================
+// SECTION 7: COLLATERAL ASSESSMENT RULES (Salience 85)
+// ============================================================
+
+rule "Collateral_RealProperty_Good"
+    salience 85
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(
+            assetType == "REAL_PROPERTY",
+            mastScore == "HIGH",
+            valuationCurrent == true,
+            ltvRatio <= 0.70
+        )
+        $explanation : Explanation()
+    then
+        modify($collateral) {
+            setCollateralQuality("EXCELLENT"),
+            setLtvApproved(0.70)
+        }
+        $explanation.addSection("Collateral Quality: EXCELLENT (Real Property)");
+        System.out.println("Collateral Quality: EXCELLENT (Real Property)");
+end
+
+rule "Collateral_Equipment_Good"
+    salience 85
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(
+            assetType == "EQUIPMENT",
+            condition == "GOOD",
+            marketDemand == "ACTIVE",
+            ltvRatio <= 0.60
+        )
+        $explanation : Explanation()
+    then
+        modify($collateral) {
+            setCollateralQuality("GOOD"),
+            setLtvApproved(0.60)
+        }
+        $explanation.addSection("Collateral Quality: GOOD (Equipment)");
+        System.out.println("Collateral Quality: GOOD (Equipment)");
+end
+
+rule "Collateral_Inventory_Good"
+    salience 85
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(
+            assetType == "INVENTORY",
+            condition == "GOOD",
+            marketDemand == "ACTIVE",
+            ltvRatio <= 0.30
+        )
+        $explanation : Explanation()
+    then
+        modify($collateral) {
+            setCollateralQuality("FAIR"),
+            setLtvApproved(0.30)
+        }
+        $explanation.addSection("Collateral Quality: FAIR (Inventory Capped at 30%)");
+        System.out.println("Collateral Quality: FAIR (Inventory Capped at 30%)");
+end
+
+rule "Collateral_Inventory_Reject_Weak"
+    salience 85
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(
+            assetType == "INVENTORY",
+            (marketDemand == "WEAK" || marketDemand == "SEASONAL")
+        )
+        $explanation : Explanation()
+    then
+        modify($collateral) {
+            setCollateralQuality("UNACCEPTABLE"),
+            setLtvApproved(0.0)
+        }
+        $explanation.addSection("Collateral REJECTED: Inventory (Weak/Seasonal Demand)");
+        System.out.println("Collateral REJECTED: Inventory (Weak/Seasonal Demand)");
+end
+
+rule "Block_Insufficient_Collateral_Coverage"
+    salience 65
+    when
+        $applicant : Applicant(finalDecision == null)
+        $collateral : Collateral(collateralCoverage < 0.50)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRejectionReason("INSUFFICIENT_COLLATERAL_COVERAGE_BELOW_50%"),
+            setRiskCategory("HIGH")
+        }
+        $explanation.addSection("BLOCKER TRIGGERED: Collateral Coverage < 50%");
+        System.out.println("BLOCKER TRIGGERED: Collateral Coverage < 50%");
+end
+
+// ============================================================
+// SECTION 8: EXCEPTION HANDLING RULES (Salience 70)
+// ============================================================
+
+rule "Startup_Modified_Criteria_Apply"
+    salience 70
+    when
+        $applicant : Applicant(businessVintage < 1, promoterIndustryExperience >= 5)
+        $financials : Financials()
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setApplyModifiedThresholds(true),
+            setCollateralRequirement(0.75)
+        }
+        modify($financials) {
+            setDscrThreshold(1.10),
+            setDeThreshold(2.5)
+        }
+        $explanation.addSection("Startup with industry experience - Modified thresholds applied");
+        System.out.println("Startup with industry experience - Modified thresholds applied");
+end
+
+rule "Stressed_Account_Recovery_Based_Reassessment"
+    salience 70
+    when
+        $applicant : Applicant(priorDefault == true, recoveryPeriodMonths >= 12)
+        $financials : Financials(currentFinancialsStatus == "IMPROVED")
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setReassessFromCurrent(true),
+            setProbationPeriod(6)
+        }
+        $explanation.addSection("Stressed Account - Reassessing from current financials");
+        System.out.println("Stressed Account - Reassessing from current financials");
+end
+
+// ============================================================
+// SECTION 9: DECISION SYNTHESIS RULES (Salience 60)
+// ============================================================
+
+rule "Final_Decision_Approve_Fair_CIBIL_Excellent_Metrics"
+    salience 61
+    when
+        $applicant : Applicant(
+            finalDecision == null,
+            cibilScore >= 500, cibilScore < 650,
+            businessVintage >= 3
+        )
+        $financials : Financials(dscr >= 1.5, overallFinancialRisk == "LOW" || overallFinancialRisk == "MODERATE")
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("APPROVE"),
+            setRiskCategory("MODERATE"),
+            setDocumentation("STANDARD"),
+            setRecommendation("STRICT_MONITORING")
+        }
+        $explanation.addSection("FINAL DECISION: APPROVE (Fair CIBIL but Excellent Metrics)");
+        System.out.println("FINAL DECISION: APPROVE (Fair CIBIL but Excellent Metrics)");
+end
+
+rule "Final_Decision_Conditional_Fair_CIBIL_Good_Metrics"
+    salience 61
+    when
+        $applicant : Applicant(
+            finalDecision == null,
+            cibilScore >= 500, cibilScore < 650
+        )
+        $financials : Financials(dscr >= 1.40, overallFinancialRisk == "MODERATE")
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("CONDITIONAL_APPROVE"),
+            setRiskCategory("MODERATE_HIGH"),
+            setDocumentation("ENHANCED"),
+            setRecommendation("ADDITIONAL_GUARANTEE_REQUIRED")
+        }
+        $explanation.addSection("FINAL DECISION: CONDITIONAL_APPROVE (Fair CIBIL with Good Metrics)");
+        System.out.println("FINAL DECISION: CONDITIONAL_APPROVE (Fair CIBIL with Good Metrics)");
+end
+
+rule "Final_Decision_Reject_Fair_CIBIL_Poor_Metrics"
+    salience 61
+    when
+        $applicant : Applicant(
+            finalDecision == null,
+            cibilScore >= 500, cibilScore < 650
+        )
+        $financials : Financials(dscr < 1.25)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRiskCategory("HIGH"),
+            setRejectionReason("FAIR_CIBIL_INSUFFICIENT_DSCR")
+        }
+        $explanation.addSection("FINAL DECISION: REJECT (Fair CIBIL with Weak Metrics)");
+        System.out.println("FINAL DECISION: REJECT (Fair CIBIL with Weak Metrics)");
+end
+
+rule "Final_Decision_Approve"
+    salience 60
+    when
+        $applicant : Applicant(
+            finalDecision == null,
+            cibilScore >= 650,
+            businessVintage >= 2,
+            managementQuality != "WEAK"
+        )
+        $financials : Financials(overallFinancialRisk == "LOW", dscr >= 1.25)
+        $collateral : Collateral(collateralCoverage >= 0.50)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("APPROVE"),
+            setRiskCategory("LOW"),
+            setDocumentation("STANDARD"),
+            setRecommendation("STANDARD_PROCESSING")
+        }
+        $explanation.addSection("FINAL DECISION: APPROVE");
+        System.out.println("FINAL DECISION: APPROVE");
+end
+
+rule "Final_Decision_Conditional_Approve"
+    salience 60
+    when
+        $applicant : Applicant(
+            finalDecision == null,
+            cibilScore >= 650,
+            managementQuality != "WEAK"
+        )
+        $financials : Financials(
+            overallFinancialRisk == "MODERATE",
+            dscr >= 1.25
+        )
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("CONDITIONAL_APPROVE"),
+            setRiskCategory("MODERATE"),
+            setDocumentation("ENHANCED"),
+            setRecommendation("ADDITIONAL_MONITORING")
+        }
+        $explanation.addSection("FINAL DECISION: CONDITIONAL_APPROVE");
+        System.out.println("FINAL DECISION: CONDITIONAL_APPROVE");
+end
+
+rule "Final_Decision_Reject_Standard"
+    salience 60
+    when
+        $applicant : Applicant(finalDecision == null)
+        $financials : Financials(overallFinancialRisk == "VERY_HIGH" || overallFinancialRisk == "HIGH")
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REJECT"),
+            setRiskCategory("HIGH"),
+            setRejectionReason("HIGH_FINANCIAL_RISK")
+        }
+        $explanation.addSection("FINAL DECISION: REJECT (Standard High Risk)");
+        System.out.println("FINAL DECISION: REJECT (Standard High Risk)");
+end
+
+rule "Final_Decision_Refer"
+    salience 50
+    when
+        $applicant : Applicant(finalDecision == null)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setFinalDecision("REFER"),
+            setRiskCategory("MODERATE_UNCERTAINTY"),
+            setRecommendation("MANUAL_REVIEW")
+        }
+        $explanation.addSection("FINAL DECISION: REFER (Fallback)");
+        System.out.println("FINAL DECISION: REFER (Fallback)");
+end
+
+// ============================================================
+// SECTION 10: COVENANT GENERATION RULES (Salience 40)
+// ============================================================
+
+rule "Generate_Financial_Covenants_Low_Risk"
+    salience 40
+    when
+        $applicant : Applicant()
+        $riskManagement : RiskManagement(riskCategory == "LOW")
+    then
+        List<String> covenants = new ArrayList<String>();
+        covenants.add("Quarterly financial statement submission");
+        covenants.add("Maintain DSCR >= 1.25 at all times");
+        covenants.add("Annual financial review");
+        modify($riskManagement) {
+            setCovenants(covenants),
+            setMonitoringFrequency("QUARTERLY")
+        }
+        System.out.println("Low Risk Covenants Applied");
+end
+
+rule "Generate_Financial_Covenants_Moderate_Risk"
+    salience 40
+    when
+        $applicant : Applicant()
+        $riskManagement : RiskManagement(riskCategory == "MODERATE" || riskCategory == "MODERATE_HIGH")
+    then
+        List<String> covenants = new ArrayList<String>();
+        covenants.add("Monthly financial statement submission");
+        covenants.add("Maintain DSCR >= 1.40 at all times");
+        covenants.add("Restrict additional borrowing without approval");
+        modify($riskManagement) {
+            setCovenants(covenants),
+            setMonitoringFrequency("MONTHLY"),
+            setGuaranteeRequired(true)
+        }
+        System.out.println("Moderate Risk Covenants Applied");
+end
+
+rule "Generate_Financial_Covenants_High_Risk"
+    salience 40
+    when
+        $applicant : Applicant()
+        $riskManagement : RiskManagement(riskCategory == "HIGH" || riskCategory == "VERY_HIGH")
+    then
+        List<String> covenants = new ArrayList<String>();
+        covenants.add("Weekly financial monitoring");
+        covenants.add("Maintain DSCR >= 1.75 at all times");
+        covenants.add("Collateral substitution restricted");
+        modify($riskManagement) {
+            setCovenants(covenants),
+            setMonitoringFrequency("WEEKLY"),
+            setEnhancedMonitoring(true)
+        }
+        System.out.println("High Risk Covenants Applied");
+end
+
+// ============================================================
+// SECTION 11: RBI-COMPLIANT EXPLANATION RULES (Salience 30)
+// ============================================================
+
+rule "Generate_Decision_Statement_Approve"
+    salience 30
+    when
+        $applicant : Applicant(finalDecision == "APPROVE")
+        $explanation : Explanation()
+    then
+        String stmt = "Your loan application for Rs." + String.format("%.0f", $applicant.getLoanAmount()) +
+            " has been APPROVED under the " + $applicant.getRiskCategory() + " risk category.";
+        modify($explanation) { setDecisionStatement(stmt) }
+end
+
+rule "Generate_Decision_Statement_Reject"
+    salience 30
+    when
+        $applicant : Applicant(finalDecision == "REJECT")
+        $explanation : Explanation()
+    then
+        String stmt = "Your loan application for Rs." + String.format("%.0f", $applicant.getLoanAmount()) +
+            " has been REJECTED. Reason: " + $applicant.getRejectionReason();
+        modify($explanation) { setDecisionStatement(stmt) }
+end
+
+
+// ============================================================
+// SECTION 12: WORKING CAPITAL CALCULATION RULES (Salience 95)
+// ============================================================
+
+rule "Calculate_Operating_Cycle_Days"
+    salience 95
+    when
+        $applicant : Applicant()
+        $workingCapital : WorkingCapital(daysInventoryOutstanding > 0, daysSalesOutstanding > 0)
+        $explanation : Explanation()
+    then
+        double operatingCycle = $workingCapital.getDaysInventoryOutstanding() +
+                                $workingCapital.getDaysSalesOutstanding() -
+                                $workingCapital.getDaysPayableOutstanding();
+        modify($workingCapital) { setOperatingCycleDays(operatingCycle) }
+        $explanation.addSection("Operating Cycle: " + String.format("%.0f", operatingCycle) + " days");
+        System.out.println("Operating Cycle: " + operatingCycle + " days");
+end
+
+// ============================================================
+// SECTION 13: EXPLAINABILITY RULES (Salience 35)
+// ============================================================
+
+rule "Add_Supporting_Factor_Strong_DSCR"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(dscr >= 1.5)
+        $explanation : Explanation()
+    then
+        $explanation.addSupportingFactor("Strong debt repayment capacity with DSCR of " + String.format("%.2f", $financials.getDscr()));
+end
+
+rule "Add_Supporting_Factor_Good_Liquidity"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentRatio >= 1.33)
+        $explanation : Explanation()
+    then
+        $explanation.addSupportingFactor("Healthy liquidity position with Current Ratio of " + String.format("%.2f", $financials.getCurrentRatio()));
+end
+
+rule "Add_Supporting_Factor_Conservative_Leverage"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(debtToEquityRatio <= 1.5)
+        $explanation : Explanation()
+    then
+        $explanation.addSupportingFactor("Conservative leverage with D/E Ratio of " + String.format("%.2f", $financials.getDebtToEquityRatio()));
+end
+
+rule "Add_Supporting_Factor_Good_CIBIL"
+    salience 35
+    when
+        $applicant : Applicant(cibilScore >= 700)
+        $explanation : Explanation()
+    then
+        $explanation.addSupportingFactor("Excellent credit history with CIBIL Score of " + $applicant.getCibilScore());
+end
+
+rule "Add_Supporting_Factor_Experience"
+    salience 35
+    when
+        $applicant : Applicant(promoterExperience >= 10)
+        $explanation : Explanation()
+    then
+        $explanation.addSupportingFactor("Experienced management with " + $applicant.getPromoterExperience() + " years in the industry");
+end
+
+rule "Add_Risk_Area_Low_Profitability"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(netProfitMargin < 3.0)
+        $explanation : Explanation()
+    then
+        $explanation.addRiskArea("Low profitability with NPM of " + String.format("%.2f", $financials.getNetProfitMargin()) + "%");
+end
+
+rule "Add_Risk_Area_Tight_Liquidity"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentRatio < 1.25)
+        $explanation : Explanation()
+    then
+        $explanation.addRiskArea("Tight liquidity with Current Ratio of " + String.format("%.2f", $financials.getCurrentRatio()));
+end
+
+rule "Add_Risk_Area_High_Leverage"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(debtToEquityRatio > 2.0)
+        $explanation : Explanation()
+    then
+        $explanation.addRiskArea("High leverage with D/E Ratio of " + String.format("%.2f", $financials.getDebtToEquityRatio()));
+end
+
+rule "Add_Risk_Area_Fair_CIBIL"
+    salience 35
+    when
+        $applicant : Applicant(cibilScore >= 500, cibilScore < 650)
+        $explanation : Explanation()
+    then
+        $explanation.addRiskArea("Fair credit score (" + $applicant.getCibilScore() + ") - consider improving to 700+");
+end
+
+rule "Add_Improvement_Target_Increase_Profitability"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(netProfitMargin < 3.0)
+        $explanation : Explanation()
+    then
+        double targetNPM = 5.0;
+        double requiredIncrease = targetNPM - $financials.getNetProfitMargin();
+        $explanation.addImprovementTarget("Increase Net Profit Margin by " + String.format("%.2f", requiredIncrease) + "% to reach " + targetNPM + "%");
+end
+
+rule "Add_Improvement_Target_Reduce_Leverage"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(debtToEquityRatio > 2.0)
+        $explanation : Explanation()
+    then
+        double targetDE = 1.5;
+        double requiredReduction = $financials.getDebtToEquityRatio() - targetDE;
+        $explanation.addImprovementTarget("Reduce Debt-to-Equity Ratio by " + String.format("%.2f", requiredReduction) + " to reach " + targetDE);
+end
+
+rule "Add_Improvement_Target_Improve_Liquidity"
+    salience 35
+    when
+        $applicant : Applicant()
+        $financials : Financials(currentRatio < 1.25)
+        $explanation : Explanation()
+    then
+        double targetCR = 1.33;
+        double requiredIncrease = targetCR - $financials.getCurrentRatio();
+        $explanation.addImprovementTarget("Improve Current Ratio by " + String.format("%.2f", requiredIncrease) + " to reach " + targetCR);
+end
+
+rule "Add_Improvement_Target_CIBIL"
+    salience 35
+    when
+        $applicant : Applicant(cibilScore < 700)
+        $explanation : Explanation()
+    then
+        int targetCIBIL = 700;
+        int requiredIncrease = targetCIBIL - $applicant.getCibilScore();
+        $explanation.addImprovementTarget("Improve CIBIL Score by " + requiredIncrease + " points to reach " + targetCIBIL);
+end
+
+rule "Add_Alternative_Product_Reject_Low_DSCR"
+    salience 35
+    when
+        $applicant : Applicant(finalDecision == "REJECT")
+        $financials : Financials(dscr < 1.25)
+        $explanation : Explanation()
+    then
+        modify($explanation) {
+            setAlternativeProducts("Consider applying for: 1) Working Capital Overdraft (lower repayment burden), 2) Trade Credit financing, 3) Equity-based funding")
+        }
+end
+
+rule "Add_Alternative_Product_Conditional"
+    salience 35
+    when
+        $applicant : Applicant(finalDecision == "CONDITIONAL_APPROVE")
+        $explanation : Explanation()
+    then
+        modify($explanation) {
+            setAlternativeProducts("You may qualify for: 1) Secured term loan with additional collateral, 2) Government-backed MSME schemes (CGTMSE), 3) Invoice discounting")
+        }
+end
+
+
+// ============================================================
+// SECTION 14: ELIGIBILITY SCREENING RULES (Salience 110)
+// ============================================================
+
+rule "Age_Eligibility_Minimum"
+    salience 110
+    when
+        $applicant : Applicant(eligible == null, age < 18)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setEligible(false),
+            setRejectionReason("INELIGIBLE_AGE_BELOW_18")
+        }
+        $explanation.addSection("REJECT: Age below 18");
+        System.out.println("REJECT: Age below 18");
+end
+
+rule "Age_Eligibility_Maximum"
+    salience 110
+    when
+        $applicant : Applicant(age > 70)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setEligible(false),
+            setRejectionReason("INELIGIBLE_AGE_ABOVE_70")
+        }
+        $explanation.addSection("REJECT: Age above 70");
+        System.out.println("REJECT: Age above 70");
+end
+
+rule "CIBIL_Score_Insufficient"
+    salience 110
+    when
+        $applicant : Applicant(cibilScore > 0, cibilScore < 500)
+        $explanation : Explanation()
+    then
+        modify($applicant) {
+            setEligible(false),
+            setRejectionReason("LOW_CIBIL_SCORE")
+        }
+        $explanation.addSection("REJECT: CIBIL Score < 500");
+        System.out.println("REJECT: CIBIL Score < 500");
+end
+
+rule "CIBIL_Score_Good_Check"
+    salience 110
+    when
+        $applicant : Applicant(cibilScore >= 650)
+    then
+        modify($applicant) {
+            setEligibleCibil(true),
+            setCibilCategory("GOOD")
+        }
+end
+
+

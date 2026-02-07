@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>MSME Loan Assessment</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+<h2>MSME Loan Assessment System</h2>
+<form action="#" th:action="@{/assess}" th:object="${application}" method="post">
+
+    <h4>Applicant Profile</h4>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label>Age:</label>
+            <input type="number" class="form-control" th:field="*{age}" required/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>CIBIL Score:</label>
+            <input type="number" class="form-control" th:field="*{cibilScore}" required/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Business Vintage (years):</label>
+            <input type="number" class="form-control" th:field="*{businessVintage}" required/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label>Promoter Experience (years):</label>
+            <input type="number" class="form-control" th:field="*{promoterExperience}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Promoter Industry Experience (years):</label>
+            <input type="number" class="form-control" th:field="*{promoterIndustryExperience}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Requested Loan Amount:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{requestedLoanAmount}" required/>
+        </div>
+    </div>
+
+    <h4>Financials</h4>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label>Current Assets:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{currentAssets}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Current Liabilities:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{currentLiabilities}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Inventory:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{inventory}"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label>Net Operating Income:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{netOperatingIncome}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Annual Debt Service:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{annualDebtService}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Total Liabilities:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{totalLiabilities}"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label>Net Worth:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{netWorth}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Annual Turnover:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{annualTurnover}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Net Sales:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{netSales}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Net Profit After Tax:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{netProfitAfterTax}"/>
+        </div>
+
+    </div>
+
+    <h4>Collateral</h4>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label>Collateral Value:</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{collateralValue}"/>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Asset Type:</label>
+            <select class="form-control" th:field="*{assetType}">
+                <option value="">Select</option>
+                <option value="REAL_PROPERTY">Real Property</option>
+                <option value="EQUIPMENT">Equipment</option>
+                <option value="INVENTORY">Inventory</option>
+                <option value="OTHER">Other</option>
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label>Industry Outlook:</label>
+            <select class="form-control" th:field="*{industryOutlook}">
+                <option value="POSITIVE">Positive</option>
+                <option value="STABLE">Stable</option>
+                <option value="NEGATIVE">Negative</option>
+                <option value="DISTRESSED">Distressed</option>
+            </select>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Assess Application</button>
+</form>
+</body>
+</html>

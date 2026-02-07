@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Assessment Result</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+<div class="card">
+    <div class="card-header bg-dark text-white">
+        <h3>Loan Assessment Result</h3>
+    </div>
+    <div class="card-body">
+        <!-- Decision Statement -->
+        <!-- Decision Statement -->
+        <div class="alert" th:classappend="${result.decision == 'APPROVE' ? 'alert-success' : (result.decision == 'REJECT' ? 'alert-danger' : 'alert-warning')}">
+            <h5>Assessment Overview</h5>
+            <p th:text="${result.decisionStatement}"></p>
+        </div>
+
+        <div class="card mb-3" th:if="${result.explanations != null && !result.explanations.isEmpty()}">
+            <div class="card-header">Detailed Assessment Breakdown</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" th:each="line : ${result.explanations}" th:text="${line}"></li>
+            </ul>
+        </div>
+
+        <div class="card mb-3" th:if="${result.supportingFactors != null && !result.supportingFactors.isEmpty()}">
+            <div class="card-header bg-success text-white">Strengths in Your Application</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" th:each="factor : ${result.supportingFactors}" th:text="${factor}"></li>
+            </ul>
+        </div>
+
+        <div class="card mb-3" th:if="${result.riskAreas != null && !result.riskAreas.isEmpty()}">
+            <div class="card-header bg-warning">Areas of Concern</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" th:each="risk : ${result.riskAreas}" th:text="${risk}"></li>
+            </ul>
+        </div>
+
+        <div class="card mb-3" th:if="${result.improvementTargets != null && !result.improvementTargets.isEmpty()}">
+            <div class="card-header bg-info text-white">Recommended Improvements</div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" th:each="target : ${result.improvementTargets}" th:text="${target}"></li>
+            </ul>
+        </div>
+
+        <div class="card mb-3" th:if="${result.alternativeProducts != null}">
+            <div class="card-header bg-primary text-white">Alternative Financing Options</div>
+            <div class="card-body">
+                <p th:text="${result.alternativeProducts}"></p>
+            </div>
+        </div>
+
+
+        <!-- Calculated Metrics -->
+        <div class="card mb-3">
+            <div class="card-header">Calculated Metrics</div>
+            <div class="card-body">
+                <p><strong>DSCR:</strong> <span th:text="${#numbers.formatDecimal(result.dscr, 1, 2)}"></span></p>
+                <p><strong>Current Ratio:</strong> <span th:text="${#numbers.formatDecimal(result.currentRatio, 1, 2)}"></span></p>
+                <p><strong>Risk Level:</strong> <span th:text="${result.riskLevel}"></span></p>
+            </div>
+        </div><a href="/assessment-form" class="btn btn-secondary mt-3">Assess Another Loan</a>
+    </div>
+</div>
+</body>
+</html>
