@@ -19,7 +19,7 @@ public class AssessmentResult {
     private List<String> riskAreas;
     private List<String> improvementTargets;
     private String nextSteps;
-    private String alternativeProducts;
+    private List<String> alternativeProducts;
     private List<String> explanations;
 
     // Computed display method

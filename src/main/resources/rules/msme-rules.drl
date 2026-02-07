@@ -674,18 +674,27 @@ end
 rule "Block_Insufficient_Collateral_Coverage"
     salience 65
     when
-        $applicant : Applicant(finalDecision == null)
+        $applicant : Applicant()
         $collateral : Collateral(collateralCoverage < 0.50)
         $explanation : Explanation()
     then
+        double coveragePercentage = $collateral.getCollateralCoverage() * 100.0;
+        double requiredCollateral = $applicant.getLoanAmount() * 0.50;
+
         modify($applicant) {
             setFinalDecision("REJECT"),
-            setRejectionReason("INSUFFICIENT_COLLATERAL_COVERAGE_BELOW_50%"),
-            setRiskCategory("HIGH")
+            setRejectionReason("INSUFFICIENT_COLLATERAL_COVERAGE_BELOW_50%")
         }
-        $explanation.addSection("BLOCKER TRIGGERED: Collateral Coverage < 50%");
-        System.out.println("BLOCKER TRIGGERED: Collateral Coverage < 50%");
+
+        $explanation.addSection("BLOCKER TRIGGERED: Collateral Coverage " +
+            String.format("%.1f", coveragePercentage) + "% < 50% (Required: Rs." +
+            String.format("%.0f", requiredCollateral) + ", Provided: Rs." +
+            String.format("%.0f", $collateral.getCollateralValue()) + ")");
+
+        System.out.println("BLOCKER: Collateral Coverage < 50%");
 end
+
+
 
 // ============================================================
 // SECTION 8: EXCEPTION HANDLING RULES (Salience 70)
@@ -1129,6 +1138,123 @@ rule "Add_Alternative_Product_Conditional"
         modify($explanation) {
             setAlternativeProducts("You may qualify for: 1) Secured term loan with additional collateral, 2) Government-backed MSME schemes (CGTMSE), 3) Invoice discounting")
         }
+end
+
+rule "Add_Risk_Area_Insufficient_Collateral"
+    salience 35
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(collateralCoverage < 0.50)
+        $explanation : Explanation()
+    then
+        double coveragePercentage = $collateral.getCollateralCoverage() * 100;
+        double shortfall = (0.50 - $collateral.getCollateralCoverage()) * $applicant.getLoanAmount();
+        $explanation.addRiskArea("Insufficient collateral coverage at " +
+            String.format("%.1f", coveragePercentage) + "% (Minimum required: 50%)");
+        $explanation.addRiskArea("Collateral shortfall: Rs." +
+            String.format("%.0f", shortfall) + " needs to be covered");
+end
+
+rule "Add_Improvement_Target_Collateral_Coverage"
+    salience 35
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(collateralCoverage < 0.50)
+        $explanation : Explanation()
+    then
+        double requiredCollateral = $applicant.getLoanAmount() * 0.50;
+        double currentCollateral = $collateral.getCollateralValue();
+        double additionalRequired = requiredCollateral - currentCollateral;
+
+        $explanation.addImprovementTarget("Increase collateral value by Rs." +
+            String.format("%.0f", additionalRequired) + " to reach minimum 50% coverage (Rs." +
+            String.format("%.0f", requiredCollateral) + ")");
+end
+
+rule "Add_Risk_Area_Low_Collateral_Coverage"
+    salience 35
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(collateralCoverage >= 0.50, collateralCoverage < 0.75)
+        $explanation : Explanation()
+    then
+        double coveragePercentage = $collateral.getCollateralCoverage() * 100;
+        $explanation.addRiskArea("Below-optimal collateral coverage at " +
+            String.format("%.1f", coveragePercentage) + "% (Recommended: 75%+)");
+end
+
+rule "Add_Improvement_Target_Better_Collateral"
+    salience 35
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(collateralCoverage >= 0.50, collateralCoverage < 0.75)
+        $explanation : Explanation()
+    then
+        double optimalCollateral = $applicant.getLoanAmount() * 0.75;
+        double currentCollateral = $collateral.getCollateralValue();
+        double additionalRecommended = optimalCollateral - currentCollateral;
+
+        $explanation.addImprovementTarget("Consider adding Rs." +
+            String.format("%.0f", additionalRecommended) +
+            " in collateral to reach optimal 75% coverage for better loan terms");
+end
+
+rule "Add_Alternative_Product_Insufficient_Collateral"
+    salience 35
+    when
+        $applicant : Applicant(finalDecision == "REJECT")
+        $collateral : Collateral(collateralCoverage < 0.50)
+        $explanation : Explanation()
+    then
+        double loanAmountWithCurrentCollateral = $collateral.getCollateralValue() / 0.50;
+
+        $explanation.addAlternativeProduct("Reduce loan amount to Rs." +
+            String.format("%.0f", loanAmountWithCurrentCollateral) +
+            " (50% of your current collateral value)");
+        $explanation.addAlternativeProduct("Provide additional collateral (real property, equipment, or personal guarantee)");
+        $explanation.addAlternativeProduct("Consider a co-borrower with additional collateral");
+        $explanation.addAlternativeProduct("Explore unsecured MSME loans (typically up to Rs.10 lakhs) if you qualify");
+end
+
+
+rule "Add_Supporting_Factor_Strong_Collateral"
+    salience 35
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(collateralCoverage >= 0.75)
+        $explanation : Explanation()
+    then
+        double coveragePercentage = $collateral.getCollateralCoverage() * 100;
+        $explanation.addSupportingFactor("Strong collateral coverage at " +
+            String.format("%.1f", coveragePercentage) + "% of loan amount");
+end
+
+rule "Add_Risk_Area_Weak_Asset_Type"
+    salience 35
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(
+            assetType == "INVENTORY" || assetType == "OTHER",
+            collateralCoverage < 1.0
+        )
+        $explanation : Explanation()
+    then
+        $explanation.addRiskArea("Collateral type '" + $collateral.getAssetType() +
+            "' has higher depreciation risk - consider adding real property or equipment");
+end
+
+rule "Add_Improvement_Target_Upgrade_Collateral_Type"
+    salience 35
+    when
+        $applicant : Applicant()
+        $collateral : Collateral(
+            assetType == "INVENTORY" || assetType == "OTHER",
+            collateralCoverage < 1.0
+        )
+        $explanation : Explanation()
+    then
+        $explanation.addImprovementTarget(
+            "Consider offering real property or fixed equipment as primary collateral for better loan terms");
 end
 
 

@@ -8,29 +8,35 @@ import java.util.List;
 @Getter
 @Setter
 public class Explanation {
-    private String decisionStatement;
     private List<String> sections = new ArrayList<>();
     private List<String> supportingFactors = new ArrayList<>();
     private List<String> riskAreas = new ArrayList<>();
     private List<String> improvementTargets = new ArrayList<>();
-    private String alternativeProducts;
+    private List<String> alternativeProducts = new ArrayList<>();
+    private String decisionStatement;
+    private String alternativeProductsText;
 
-    // Existing methods
-    public void addSection(String line) {
-        sections.add(line);
+    public void addSection(String section) {
+        this.sections.add(section);
     }
 
     public void addSupportingFactor(String factor) {
-        supportingFactors.add(factor);
+        this.supportingFactors.add(factor);
     }
 
     public void addRiskArea(String risk) {
-        riskAreas.add(risk);
+        this.riskAreas.add(risk);
     }
 
     public void addImprovementTarget(String target) {
-        improvementTargets.add(target);
+        this.improvementTargets.add(target);
     }
 
-    // Getters and setters for all fields
+    public void addAlternativeProduct(String product) {
+        this.alternativeProducts.add(product);
+    }
+
+    public void setAlternativeProducts(String productsText) {
+        this.alternativeProductsText = productsText;
+    }
 }

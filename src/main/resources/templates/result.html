@@ -52,6 +52,18 @@
             </div>
         </div>
 
+        <div th:if="${result.alternativeProducts != null and !result.alternativeProducts.isEmpty()}" class="mt-4">
+            <h5 class="text-info">Alternative Loan Products</h5>
+            <ul class="list-group">
+                <li th:each="product : ${result.alternativeProducts}"
+                    th:text="${product}"
+                    class="list-group-item list-group-item-info">
+                </li>
+            </ul>
+        </div>
+
+
+
 
         <!-- Calculated Metrics -->
         <div class="card mb-3">
