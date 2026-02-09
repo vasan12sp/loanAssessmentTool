@@ -1,124 +1,173 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>MSME Loan Readiness & Self-Assessment</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSME Loan Assessment - Home</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 0;
-            border-radius: 10px;
-            margin-bottom: 30px;
-        }
-        .feature-box {
-            padding: 20px;
-            border-left: 4px solid #667eea;
-            margin-bottom: 15px;
-            background-color: #f8f9fa;
-        }
-        .note-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 30px 0;
-        }</style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/main-styles.css}">
+
 </head>
 <body>
-<div class="container mt-5">
-    <div class="hero-section text-center">
-        <h1 class="display-4">MSME Loan Readiness & Self-Assessment</h1>
-        <p class="lead">Know where you stand before you apply.</p>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <p class="lead">
-                Most MSME owners apply for loans without knowing why banks approve or reject applications.
-                Banks rarely explain their decision in detail — leaving you confused, frustrated, and
-                uncertain about what to fix.
-            </p>
-
-            <p>
-                Our Self-Assessment Tool helps you understand your loan readiness in advance, based on
-                standard banking principles used by most lenders. In just a few minutes, you can get a
-                realistic view of your strengths, gaps, and what you may need to improve before approaching a bank.
-            </p>
-
-            <h4 class="mt-4 mb-3">What you'll get from this tool:</h4>
-
-            <div class="feature-box">
-                <strong>✅ An indicative loan readiness score</strong>
-            </div>
-            <div class="feature-box">
-                <strong>✅ Key areas where your business looks strong</strong>
-            </div>
-            <div class="feature-box">
-                <strong>✅ Specific areas that may need improvement</strong>
-            </div>
-            <div class="feature-box">
-                <strong>✅ Guidance on what banks typically look for</strong>
-            </div>
-            <div class="feature-box">
-                <strong>✅ A clearer picture before you formally apply</strong>
-            </div>
-
-            <div class="note-box">
-                <h5><strong>Important Note (Clear & Transparent)</strong></h5>
-                <p>
-                    This is a <strong>self-assessment tool</strong> based on standard banking principles.
-                    Final loan approval depends entirely on the bank's own due diligence, policies, and documentation.
-                </p>
-                <p>Banks may also consider additional factors such as:</p>
-                <ul>
-                    <li>Site visits</li>
-                    <li>Cash flow analysis</li>
-                    <li>GST filings</li>
-                    <li>Bank statements</li>
-                    <li>Industry risk</li>
-                    <li>Business vintage and stability</li>
-                </ul>
-                <p class="mb-0">
-                    <strong>This tool predicts your probability and readiness — it is not a legally binding loan approval.</strong>
-                </p>
-            </div>
-
-            <h4 class="mt-4 mb-3">Why use this tool before applying?</h4>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card border-danger mb-3">
-                        <div class="card-header bg-danger text-white">Instead of:</div>
-                        <div class="card-body">
-                            <ul class="mb-0">
-                                <li>Applying blindly</li>
-                                <li>Getting rejected without explanation</li>
-                                <li>Reapplying repeatedly</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-success mb-3">
-                        <div class="card-header bg-success text-white">You can:</div>
-                        <div class="card-body">
-                            <ul class="mb-0">
-                                <li>Assess first</li>
-                                <li>Strengthen your profile</li>
-                                <li>Apply with more confidence</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mt-5 mb-5">
-                <h4>Ready to check your loan readiness?</h4>
-                <a href="/assessment-form" class="btn btn-primary btn-lg mt-3">Start Your Assessment Now</a>
+<!-- Header Navigation -->
+<nav class="header-nav">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="/" class="brand">
+                <i class="bi bi-bank2"></i>
+                MSME Loan Assessment
+            </a>
+            <div class="d-flex gap-2">
+                <a href="/" class="nav-link active">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+                <a href="/assessment-form" class="nav-link">
+                    <i class="bi bi-clipboard-check"></i> Assessment
+                </a>
             </div>
         </div>
     </div>
+</nav>
+
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1><i class="bi bi-graph-up-arrow text-primary"></i> MSME Loan Readiness Assessment</h1>
+        <p class="lead">Understand your loan eligibility before you apply</p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-card">
+        <p class="lead">
+            Most MSME owners apply for loans without knowing why banks approve or reject applications.
+            Banks rarely explain their decision in detail — leaving you confused, frustrated, and
+            uncertain about what to fix.
+        </p>
+
+        <p>
+            Our Self-Assessment Tool helps you understand your loan readiness in advance, based on
+            standard banking principles used by most lenders. In just a few minutes, you can get a
+            realistic view of your strengths, gaps, and what you may need to improve before approaching a bank.
+        </p>
+
+        <h4 class="mt-5 mb-4"><i class="bi bi-check-circle text-success"></i> What You'll Get:</h4>
+
+        <div class="feature-box">
+            <i class="bi bi-speedometer2"></i>
+            <strong>Indicative loan readiness score</strong>
+        </div>
+        <div class="feature-box">
+            <i class="bi bi-star"></i>
+            <strong>Key areas where your business looks strong</strong>
+        </div>
+        <div class="feature-box">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Specific areas that may need improvement</strong>
+        </div>
+        <div class="feature-box">
+            <i class="bi bi-lightbulb"></i>
+            <strong>Guidance on what banks typically look for</strong>
+        </div>
+        <div class="feature-box">
+            <i class="bi bi-eye"></i>
+            <strong>A clearer picture before you formally apply</strong>
+        </div>
+
+        <!-- Important Note -->
+        <div class="note-box">
+            <h5>
+                <i class="bi bi-info-circle-fill"></i>
+                Important Note
+            </h5>
+            <p>
+                This is a <strong>self-assessment tool</strong> based on standard banking principles.
+                Final loan approval depends entirely on the bank's own due diligence, policies, and documentation.
+            </p>
+            <p>Banks may also consider additional factors such as:</p>
+            <ul>
+                <li>Site visits and physical verification</li>
+                <li>Detailed cash flow analysis</li>
+                <li>GST filings and tax returns</li>
+                <li>Bank statements and transaction history</li>
+                <li>Industry risk and market conditions</li>
+                <li>Business vintage and operational stability</li>
+            </ul>
+            <p class="mb-0">
+                <strong>This tool predicts your probability and readiness — it is not a legally binding loan approval.</strong>
+            </p>
+        </div>
+
+        <h4 class="mt-5 mb-4"><i class="bi bi-arrow-left-right text-primary"></i> Why Use This Tool?</h4>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="comparison-card">
+                    <div class="card-header bg-danger text-white">
+                        <i class="bi bi-x-circle"></i> Without Assessment
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Applying blindly without preparation</li>
+                            <li>Getting rejected without clear explanation</li>
+                            <li>Multiple rejections affecting credit score</li>
+                            <li>Wasted time and documentation effort</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="comparison-card">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-check-circle"></i> With Assessment
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Assess your readiness first</li>
+                            <li>Identify and strengthen weak areas</li>
+                            <li>Apply with confidence and preparation</li>
+                            <li>Improve your chances of approval</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+        <h4>Ready to Check Your Loan Readiness?</h4>
+        <p class="text-muted mb-4">Complete the assessment in under 5 minutes</p>
+        <a href="/assessment-form" class="btn btn-cta">
+            Start Your Assessment
+            <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <!-- Developer Section -->
+    <div class="developer-section">
+        <h5><i class="bi bi-person-badge"></i> About the Developer</h5>
+        <p>
+            Have feedback or questions? I'd love to hear from you! Connect with me for suggestions,
+            improvements, or collaboration opportunities.
+        </p>
+        <div class="developer-links">
+            <a href="mailto:vasan12sp@zohomail.in" class="btn-developer btn-email">
+                <i class="bi bi-envelope-fill"></i>
+                Email Me
+            </a>
+            <a href="https://www.linkedin.com/in/vasan12sp" target="_blank" class="btn-developer btn-linkedin">
+                <i class="bi bi-linkedin"></i>
+                LinkedIn
+            </a>
+            <a href="" target="_blank" class="btn-developer btn-portfolio">
+                <i class="bi bi-globe"></i>
+                Portfolio
+            </a>
+        </div>
+    </div>
 </div>
+
+<div class="pb-5"></div>
 </body>
 </html>

@@ -1,182 +1,262 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MSME Loan Assessment</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/css/loan-form.css}">
+    <link rel="stylesheet" th:href="@{/css/loan-form-enhanced.css}">
 </head>
-<body class="container mt-5">
-<h2>MSME Loan Assessment System</h2>
-<p class="text-muted">Fields marked with <span class="text-danger">*</span> are mandatory</p>
+<body>
+<div class="container">
+    <h2 class="page-title">
+        <i class="bi bi-bank2"></i> MSME Loan Assessment System
+    </h2>
 
-<form action="#" th:action="@{/assess}" th:object="${application}" method="post" id="loanAssessmentForm">
+    <div class="form-container">
+        <div class="required-note">
+            <i class="bi bi-info-circle-fill text-warning"></i>
+            <span>Fields marked with <span class="text-danger fw-bold">*</span> are mandatory</span>
+        </div>
 
-    <h4>Applicant Profile</h4>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label>Age: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Enter the applicant's age in years (must be 18 or above)</small>
-            <input type="text" class="form-control" th:field="*{age}" placeholder="e.g., 35"
-                   data-validation="positive" data-min="18" data-max="100" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>CIBIL Score: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Credit score between 300-900 (higher is better)</small>
-            <input type="text" class="form-control" th:field="*{cibilScore}" placeholder="e.g., 750"
-                   data-validation="range" data-min="300" data-max="900" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Business Vintage (years): <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">How long has the business been operating</small>
-            <input type="text" class="form-control" th:field="*{businessVintage}" placeholder="e.g., 5"
-                   data-validation="positive" data-min="0" data-max="100" required/>
-            <div class="error-message"></div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label>Promoter Experience (years): <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total business experience of the promoter</small>
-            <input type="text" class="form-control" th:field="*{promoterExperience}" placeholder="e.g., 10"
-                   data-validation="positive" data-min="0" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Promoter Industry Experience (years): <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Experience in the current industry/sector</small>
-            <input type="text" class="form-control" th:field="*{promoterIndustryExperience}" placeholder="e.g., 8"
-                   data-validation="positive" data-min="0" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Requested Loan Amount: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total loan amount you're applying for (in Rs.)</small>
-            <input type="text" class="form-control" th:field="*{requestedLoanAmount}" placeholder="e.g., 1000000"
-                   data-validation="positive" data-min="1" required/>
-            <div class="error-message"></div>
-        </div>
-    </div>
+        <form action="#" th:action="@{/assess}" th:object="${application}" method="post" id="loanAssessmentForm">
 
-    <h4>Financials</h4>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label>Current Assets: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total current assets (cash, receivables, inventory, etc.) in Rs.</small>
-            <input type="text" class="form-control" th:field="*{currentAssets}" placeholder="e.g., 5000000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Current Liabilities: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total current liabilities (payables, short-term debt) in Rs.</small>
-            <input type="text" class="form-control" th:field="*{currentLiabilities}" placeholder="e.g., 2000000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Inventory: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total value of stock/inventory held in Rs.</small>
-            <input type="text" class="form-control" th:field="*{inventory}" placeholder="e.g., 1500000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label>Net Operating Income: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Annual profit from operations before interest and tax in Rs.</small>
-            <input type="text" class="form-control" th:field="*{netOperatingIncome}" placeholder="e.g., 800000"
-                   data-validation="number" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Annual Debt Service: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total yearly loan repayments (principal + interest) in Rs.</small>
-            <input type="text" class="form-control" th:field="*{annualDebtService}" placeholder="e.g., 300000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Total Liabilities: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">All outstanding debts and liabilities in Rs.</small>
-            <input type="text" class="form-control" th:field="*{totalLiabilities}" placeholder="e.g., 3000000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label>Net Worth: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total assets minus total liabilities in Rs.</small>
-            <input type="text" class="form-control" th:field="*{netWorth}" placeholder="e.g., 5000000"
-                   data-validation="number" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Annual Turnover: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total yearly sales/revenue in Rs.</small>
-            <input type="text" class="form-control" th:field="*{annualTurnover}" placeholder="e.g., 10000000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Net Sales: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Total sales after returns and discounts in Rs.</small>
-            <input type="text" class="form-control" th:field="*{netSales}" placeholder="e.g., 9500000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label>Net Profit After Tax: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Final profit after all expenses and taxes in Rs.</small>
-            <input type="text" class="form-control" th:field="*{netProfitAfterTax}" placeholder="e.g., 500000"
-                   data-validation="number" required/>
-            <div class="error-message"></div>
-        </div>
-    </div>
+            <!-- Applicant Profile Section -->
+            <div class="section-header">
+                <i class="bi bi-person-badge"></i>
+                <h4>Applicant Profile</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Age: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Applicant's age (18-100 years)</small>
+                    <input type="text" class="form-control" th:field="*{age}" placeholder="e.g., 35"
+                           data-validation="positive" data-min="18" data-max="100" required/>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>CIBIL Score: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Credit score (300-900, higher is better)</small>
+                    <input type="text" class="form-control" th:field="*{cibilScore}" placeholder="e.g., 750"
+                           data-validation="range" data-min="300" data-max="900" required/>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Business Vintage (years): <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Years in operation</small>
+                    <input type="text" class="form-control" th:field="*{businessVintage}" placeholder="e.g., 5"
+                           data-validation="positive" data-min="0" data-max="100" required/>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Promoter Experience (years): <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Total business experience</small>
+                    <input type="text" class="form-control" th:field="*{promoterExperience}" placeholder="e.g., 10"
+                           data-validation="positive" data-min="0" required/>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Industry Experience (years): <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Experience in current sector</small>
+                    <input type="text" class="form-control" th:field="*{promoterIndustryExperience}" placeholder="e.g., 8"
+                           data-validation="positive" data-min="0" required/>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Requested Loan Amount: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Total loan amount applying for</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{requestedLoanAmount}" placeholder="10,00,000"
+                               data-validation="positive" data-min="1" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+            </div>
 
-    <h4>Collateral</h4>
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <label>Collateral Value: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Market value of assets offered as security in Rs.</small>
-            <input type="text" class="form-control" th:field="*{collateralValue}" placeholder="e.g., 2000000"
-                   data-validation="positive" required/>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Asset Type: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Type of collateral being offered</small>
-            <select class="form-control" th:field="*{assetType}" required>
-                <option value="">Select Asset Type</option>
-                <option value="REAL_PROPERTY">Real Property</option>
-                <option value="EQUIPMENT">Equipment</option>
-                <option value="INVENTORY">Inventory</option>
-                <option value="OTHER">Other</option>
-            </select>
-            <div class="error-message"></div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <label>Industry Outlook: <span class="text-danger">*</span></label>
-            <small class="form-text text-muted d-block mb-1">Current market condition of your industry</small>
-            <select class="form-control" th:field="*{industryOutlook}" required>
-                <option value="">Select Outlook</option>
-                <option value="POSITIVE">Positive</option>
-                <option value="STABLE">Stable</option>
-                <option value="NEGATIVE">Negative</option>
-                <option value="DISTRESSED">Distressed</option>
-            </select>
-            <div class="error-message"></div>
-        </div>
-    </div>
+            <!-- Financial Information Section -->
+            <div class="section-header">
+                <i class="bi bi-calculator"></i>
+                <h4>Financial Information</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Current Assets: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Cash, receivables, inventory, etc.</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{currentAssets}" placeholder="50,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Current Liabilities: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Payables, short-term debt</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{currentLiabilities}" placeholder="20,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Inventory: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Total stock value</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{inventory}" placeholder="15,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Net Operating Income: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Annual profit before interest & tax</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{netOperatingIncome}" placeholder="8,00,000"
+                               data-validation="number" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Annual Debt Service: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Yearly loan repayments</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{annualDebtService}" placeholder="3,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Total Liabilities: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">All outstanding debts</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{totalLiabilities}" placeholder="30,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Net Worth: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Assets minus liabilities</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{netWorth}" placeholder="50,00,000"
+                               data-validation="number" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Annual Turnover: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Total yearly sales/revenue</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{annualTurnover}" placeholder="1,00,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Net Sales: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Sales after returns & discounts</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{netSales}" placeholder="95,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Net Profit After Tax: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Final profit after all expenses</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{netProfitAfterTax}" placeholder="5,00,000"
+                               data-validation="number" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+            </div>
 
-    <button type="submit" class="btn btn-primary" id="submitBtn">Assess Application</button>
-</form>
+            <!-- Collateral & Industry Section -->
+            <div class="section-header">
+                <i class="bi bi-shield-check"></i>
+                <h4>Collateral & Industry Details</h4>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Collateral Value: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Market value of security assets</small>
+                    <div class="field-wrapper">
+                        <span class="currency-prefix">₹</span>
+                        <input type="text" class="form-control formatted-input input-with-prefix"
+                               th:field="*{collateralValue}" placeholder="20,00,000"
+                               data-validation="positive" data-format="currency" required/>
+                    </div>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Asset Type: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Type of collateral offered</small>
+                    <select class="form-control" th:field="*{assetType}" required>
+                        <option value="">-- Select Asset Type --</option>
+                        <option value="REAL_PROPERTY">Real Property</option>
+                        <option value="EQUIPMENT">Equipment</option>
+                        <option value="INVENTORY">Inventory</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Industry Outlook: <span class="text-danger">*</span></label>
+                    <small class="form-text text-muted">Current market condition</small>
+                    <select class="form-control" th:field="*{industryOutlook}" required>
+                        <option value="">-- Select Outlook --</option>
+                        <option value="POSITIVE">Positive</option>
+                        <option value="STABLE">Stable</option>
+                        <option value="NEGATIVE">Negative</option>
+                        <option value="DISTRESSED">Distressed</option>
+                    </select>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                    <i class="bi bi-check-circle"></i> Assess Loan Application
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script th:src="@{/js/loan-form-validation.js}"></script>
+<script th:src="@{/js/currency-formatter.js}"></script>
 </body>
 </html>
