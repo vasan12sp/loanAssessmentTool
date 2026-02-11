@@ -10,6 +10,10 @@ The application uses **Drools forward chaining with salience-based conflict reso
 
 ---
 
+Tool link: https://msmeloancheck.me
+
+---
+
 ## 🎯 Problem Statement
 
 MSMEs often face opaque lending processes and struggle to understand:
