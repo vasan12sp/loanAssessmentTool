@@ -1,14 +1,12 @@
-
-
 # MSME Loan Readiness & Self-Assessment Tool
 
 ## 🔹 Overview
 
 This project is a **rule-based, knowledge-engineered expert system** that enables Micro, Small, and Medium Enterprises (MSMEs) to self-assess their loan readiness before approaching banks.
 
-The system is **not AI/ML-based**. Instead, it codifies domain expertise directly: **120+ Drools production rules** were manually derived from **RBI MSME lending principles, banking credit policies, and standard credit risk assessment practices**.
+Unlike AI/ML-based credit tools, this system is built on **explicit, transparent business rules** — making it deterministic, auditable, and compliant with financial regulations. The decision logic is powered by **70+ engineered Drools production rules**, derived from **RBI MSME lending principles, banking credit policies, and standard credit risk assessment practices**.
 
-At its core, the application uses **Drools forward chaining with salience-based conflict resolution**, integrated into a **Spring Boot + Thymeleaf web application** with an interactive dashboard and built-in PDF report generation.
+The application uses **Drools forward chaining with salience-based conflict resolution**, integrated into a **Spring Boot + Thymeleaf web application**, featuring an interactive dashboard and automated PDF report generation. The system is deployed on **AWS EC2 with AWS WAF** for secure, real-world accessibility.
 
 ---
 
@@ -18,14 +16,14 @@ MSMEs often face opaque lending processes and struggle to understand:
 
 * Why applications are rejected or delayed
 * Whether their financials meet lender expectations
-* What specific areas need improvement
 * How banks evaluate risk across multiple dimensions
+* What specific areas need improvement before applying
 
 This tool provides:
 
-* A structured **pre-loan diagnostic**
+* A structured **pre-loan diagnostic assessment**
 * Transparent, explainable decision-making
-* Identification of risk areas
+* Identification of financial and operational risk areas
 * Concrete, actionable improvement targets
 * A repeatable, standardized assessment workflow
 
@@ -33,28 +31,25 @@ This tool provides:
 
 ## 🏗️ Technical Architecture
 
-### High-Level Architecture
-
-![img.png](img.png)
-
 ### Technology Stack
 
-| Layer                | Technology                     |
-| -------------------- | ------------------------------ |
-| Backend              | Java 17                        |
-| Web Framework        | Spring Boot                    |
-| View Layer           | Thymeleaf                      |
-| Rule Engine          | Drools (KIE, Stateful Session) |
-| Build Tool           | Maven                          |
-| Decision Strategy    | Forward Chaining + Salience    |
-| Reporting            | Server-generated PDF           |
-| Deployment (Planned) | AWS EC2 + WAF                  |
+| Layer             | Technology                     |
+| ----------------- | ------------------------------ |
+| Backend           | Java 17                        |
+| Web Framework     | Spring Boot                    |
+| View Layer        | Thymeleaf                      |
+| Rule Engine       | Drools (KIE, Stateful Session) |
+| Build Tool        | Maven                          |
+| Decision Strategy | Forward Chaining + Salience    |
+| Reporting         | Server-generated PDF           |
+| Cloud Deployment  | AWS EC2                        |
+| Security          | AWS WAF                        |
 
 ---
 
 ## 🧠 Drools Rule Architecture (14 Sections)
 
-The rule base is organized into **14 logical sections**, each with a clear responsibility:
+The rule base is organized into **14 logical sections**, each serving a distinct purpose in the credit assessment workflow:
 
 | Section                      | Purpose                                    |
 | ---------------------------- | ------------------------------------------ |
@@ -75,24 +70,26 @@ The rule base is organized into **14 logical sections**, each with a clear respo
 
 ### Forward Chaining & Salience Design
 
-* The system uses **forward chaining**:
+The system follows a **forward chaining** inference model:
 
-    * Input facts → trigger rules
-    * Rules assert new derived facts → trigger further reasoning
-* **Salience controls execution priority**:
+* Input facts trigger rules
+* Rules assert derived facts
+* Derived facts trigger further reasoning
 
-    * **High salience:** data validation & eligibility
-    * **Medium salience:** financial ratio evaluation
-    * **Low salience:** risk aggregation
-    * **Lowest salience:** final decision rules
+**Salience-based execution priority:**
 
-This ensures **deterministic, transparent, and auditable reasoning**, which is critical for financial decision support.
+* **High salience:** Data validation & eligibility
+* **Medium salience:** Financial ratio evaluation
+* **Low salience:** Risk aggregation
+* **Lowest salience:** Final decision rules
+
+This ensures **deterministic, transparent, and auditable reasoning**, which is critical for financial decision support and regulatory compliance.
 
 ---
 
 ## 📊 Multi-Dimensional Risk Scoring Model
 
-The system computes a composite risk profile across multiple dimensions:
+The system evaluates risk across multiple financial and operational dimensions:
 
 | Dimension     | Key Metrics Used                       |
 | ------------- | -------------------------------------- |
@@ -104,7 +101,7 @@ The system computes a composite risk profile across multiple dimensions:
 | Operational   | Business stability indicators          |
 | Sectoral      | Industry-specific risk factors         |
 
-Each dimension contributes to an overall **Risk Score (0–100)**, which feeds into the final decision.
+Each dimension contributes to an overall **Risk Score (0–100)**, which feeds into the final lending recommendation.
 
 ---
 
@@ -123,35 +120,33 @@ The engine produces one of four outcomes:
 
 ## 🔍 Explainability & Reasoning (Key Differentiator)
 
-Unlike black-box systems, this tool is fully explainable:
-
-For every assessment, the system provides:
+A major strength of this system is its **built-in explainability**. For every assessment, the system provides:
 
 1. **List of Fired Drools Rules**
-2. **Identified Risk Areas**, e.g.:
+2. **Identified Risk Areas**, such as:
 
-    * “DSCR below recommended threshold”
-    * “High leverage risk (D/E > 2.0)”
-    * “Weak profitability trend”
+   * “DSCR below recommended threshold”
+   * “High leverage risk (D/E > 2.0)”
+   * “Weak profitability trend”
 3. **Concrete Improvement Targets**, such as:
 
-    * “Improve Current Ratio to ≥ 1.5”
-    * “Reduce Debt-to-Equity below 2.0”
-    * “Increase DSCR above 1.25”
+   * “Improve Current Ratio to ≥ 1.5”
+   * “Reduce Debt-to-Equity below 2.0”
+   * “Increase DSCR above 1.25”
 4. **Traceable Decision Path**, showing how intermediate conclusions led to the final outcome.
 
-This makes the system suitable for **audit, compliance, and credit training use cases**.
+This makes the system suitable for **audit, compliance, and credit analyst training**.
 
 ---
 
 ## 🖥️ User Interface (Thymeleaf Dashboard)
 
-The application includes a web-based dashboard that provides:
+The web-based dashboard provides:
 
 * Guided data input for MSMEs
 * Real-time validation feedback
 * Visual risk summary across dimensions
-* Clear decision display (APPROVE/CONDITIONAL/REJECT/REFER)
+* Clear decision display (APPROVE / CONDITIONAL / REJECT / REFER)
 * Actionable recommendations panel
 
 ### PDF Report Generation
@@ -168,9 +163,6 @@ Users can download a structured PDF report containing:
 This makes the tool suitable for sharing with accountants, consultants, or lenders.
 
 ---
-
-
-
 
 ## ⚙️ Installation & Setup
 
@@ -195,25 +187,44 @@ Access the application at:
 http://localhost:8080
 ```
 
+---
 
+## ☁️ Cloud Deployment (AWS)
+
+The application is deployed on:
+
+* **AWS EC2** — for scalable, publicly accessible hosting
+* **AWS WAF** — for enhanced security and protection against malicious web traffic
+
+This demonstrates end-to-end capability from development to secure cloud deployment.
 
 ---
 
 ## 🧪 Testing
 
-* Unit tests for:
+The project includes:
 
-    * Financial ratio calculations (DSCR, D/E, Current Ratio, ROE, NPM)
-* Drools Rule Unit tests for:
+### Unit Tests
 
-    * Critical decision paths
-    * Boundary conditions (threshold edges)
-* Integration tests:
+* Financial ratio calculations:
 
-    * End-to-end assessment workflow
-    * PDF generation validation
+  * DSCR
+  * Debt-to-Equity (D/E)
+  * Current Ratio
+  * ROE
+  * Net Profit Margin (NPM)
 
-Run tests:
+### Drools Rule Tests
+
+* Validation of critical decision paths
+* Boundary testing for threshold values
+
+### Integration Tests
+
+* End-to-end assessment workflow
+* PDF report generation validation
+
+Run tests using:
 
 ```sh
 mvn test
@@ -238,7 +249,7 @@ mvn test
 * Explainability logs maintained for traceability
 * Decision logic aligned with **RBI MSME lending principles**
 * Deterministic, auditable reasoning (no black-box AI)
-* Planned protection via **AWS WAF** in production
+* Protected by **AWS WAF** in production
 
 ---
 
@@ -251,3 +262,8 @@ mvn test
 * Integration with accounting tools (Tally, Zoho Books)
 * Role-based access for consultants and advisors
 
+---
+
+## 📧 Contact
+
+For queries, contributions, or collaboration, feel free to reach out via the repository issues section.
