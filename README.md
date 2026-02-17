@@ -1,191 +1,292 @@
-# MSME Loan Readiness & Self-Assessment Tool
 
-## 🔹 Overview
+# 🏦 MSME Loan Readiness & Self-Assessment Tool
 
-This project is a **rule-based, knowledge-engineered expert system** that enables Micro, Small, and Medium Enterprises (MSMEs) to self-assess their loan readiness before approaching banks.
+> A rule-based expert system powered by Drools and Spring Boot that enables MSMEs to evaluate loan readiness using transparent, auditable credit assessment rules aligned with RBI lending principles.
 
-Unlike AI/ML-based credit tools, this system is built on **explicit, transparent business rules** — making it deterministic, auditable, and compliant with financial regulations. The decision logic is powered by **70+ engineered Drools production rules**, derived from **RBI MSME lending principles, banking credit policies, and standard credit risk assessment practices**.
-
-The application uses **Drools forward chaining with salience-based conflict resolution**, integrated into a **Spring Boot + Thymeleaf web application**, featuring an interactive dashboard and automated PDF report generation. The system is deployed on **AWS EC2 with AWS WAF** for secure, real-world accessibility.
-
----
-
-Tool link: https://msmeloancheck.me
-
----
-
-## 🎯 Problem Statement
-
-MSMEs often face opaque lending processes and struggle to understand:
-
-* Why applications are rejected or delayed
-* Whether their financials meet lender expectations
-* How banks evaluate risk across multiple dimensions
-* What specific areas need improvement before applying
-
-This tool provides:
-
-* A structured **pre-loan diagnostic assessment**
-* Transparent, explainable decision-making
-* Identification of financial and operational risk areas
-* Concrete, actionable improvement targets
-* A repeatable, standardized assessment workflow
+![Java](https://img.shields.io/badge/Java-17-orange)
+![Spring Boot](https://img.shields.io/badge/SpringBoot-Backend-green)
+![Drools](https://img.shields.io/badge/Drools-RuleEngine-red)
+![AWS](https://img.shields.io/badge/AWS-EC2-yellow)
+![Security](https://img.shields.io/badge/Security-ModSecurity_WAF-blue)
+![Status](https://img.shields.io/badge/Status-Production_Live-success)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 ---
 
-## 🏗️ Technical Architecture
+## 🌐 Live Production Deployment
 
-### Technology Stack
+**Access the tool here:**
 
-| Layer             | Technology                     |
-| ----------------- | ------------------------------ |
-| Backend           | Java 17                        |
-| Web Framework     | Spring Boot                    |
-| View Layer        | Thymeleaf                      |
-| Rule Engine       | Drools (KIE, Stateful Session) |
-| Build Tool        | Maven                          |
-| Decision Strategy | Forward Chaining + Salience    |
-| Reporting         | Server-generated PDF           |
-| Cloud Deployment  | AWS EC2                        |
-| Security          | AWS WAF                        |
+https://msmeloancheck.me
+
+Deployed on:
+
+- AWS EC2 (Production server)
+- ModSecurity Web Application Firewall (WAF)
+- Secure public internet access
+- Real-world deployment environment
 
 ---
 
-## 🧠 Drools Rule Architecture (14 Sections)
+## 📖 Overview
 
-The rule base is organized into **14 logical sections**, each serving a distinct purpose in the credit assessment workflow:
+The MSME Loan Readiness Tool is a **knowledge-engineered expert system** designed to help Micro, Small, and Medium Enterprises assess their credit readiness before applying for loans.
 
-| Section                      | Purpose                                    |
-| ---------------------------- | ------------------------------------------ |
-| 1. Data Completeness Rules   | Validate mandatory inputs before reasoning |
-| 2. Basic Eligibility Rules   | MSME classification & legal status checks  |
-| 3. Financial Integrity Rules | Accounting consistency validation          |
-| 4. Liquidity Risk Rules      | Current Ratio, Working Capital adequacy    |
-| 5. Solvency Risk Rules       | Debt-to-Equity (D/E) evaluation            |
-| 6. Profitability Rules       | Net Profit Margin (NPM), ROE assessment    |
-| 7. Cash Flow Rules           | DSCR computation and thresholds            |
-| 8. Leverage Rules            | Borrowing limits and risk flags            |
-| 9. Compliance Rules          | Regulatory & documentation checks          |
-| 10. Credit Behavior Rules    | Defaults, delays, and payment history      |
-| 11. Sector Risk Rules        | Industry-specific risk signals             |
-| 12. Operational Risk Rules   | Business stability indicators              |
-| 13. Aggregation Rules        | Multi-dimensional risk scoring             |
-| 14. Decision Rules           | Final classification                       |
+Unlike AI/ML-based systems, this tool uses:
 
-### Forward Chaining & Salience Design
+- Explicit, deterministic business rules
+- Transparent decision logic
+- Fully explainable reasoning
+- Audit-compliant inference model
 
-The system follows a **forward chaining** inference model:
+The system uses **70+ Drools production rules**, derived from:
 
-* Input facts trigger rules
-* Rules assert derived facts
-* Derived facts trigger further reasoning
-
-**Salience-based execution priority:**
-
-* **High salience:** Data validation & eligibility
-* **Medium salience:** Financial ratio evaluation
-* **Low salience:** Risk aggregation
-* **Lowest salience:** Final decision rules
-
-This ensures **deterministic, transparent, and auditable reasoning**, which is critical for financial decision support and regulatory compliance.
+- RBI MSME lending principles
+- Banking credit risk frameworks
+- Financial ratio standards
+- Real-world credit analyst workflows
 
 ---
 
-## 📊 Multi-Dimensional Risk Scoring Model
+## ❗ Problem It Solves
 
-The system evaluates risk across multiple financial and operational dimensions:
+MSMEs often face opaque lending decisions because they cannot evaluate:
 
-| Dimension     | Key Metrics Used                       |
-| ------------- | -------------------------------------- |
-| Liquidity     | **Current Ratio**                      |
-| Solvency      | **Debt-to-Equity (D/E)**               |
-| Cash Flow     | **DSCR (Debt Service Coverage Ratio)** |
-| Profitability | **Net Profit Margin (NPM), ROE**       |
-| Compliance    | Documentation & statutory adherence    |
-| Operational   | Business stability indicators          |
-| Sectoral      | Industry-specific risk factors         |
+- Credit eligibility beforehand
+- Financial weaknesses
+- Risk indicators
+- Areas requiring improvement
 
-Each dimension contributes to an overall **Risk Score (0–100)**, which feeds into the final lending recommendation.
+This system provides:
 
----
-
-## ✅ Decision Logic
-
-The engine produces one of four outcomes:
-
-| Decision                | Interpretation                              |
-| ----------------------- | ------------------------------------------- |
-| **APPROVE**             | Strong financials, low risk, compliant      |
-| **CONDITIONAL_APPROVE** | Generally acceptable but needs improvements |
-| **REJECT**              | High financial or compliance risk           |
-| **REFER**               | Ambiguous case requiring human review       |
+- Transparent pre-loan assessment
+- Multi-dimensional risk analysis
+- Explainable credit recommendations
+- Actionable financial improvement guidance
 
 ---
 
-## 🔍 Explainability & Reasoning (Key Differentiator)
+## ✨ Key Features
 
-A major strength of this system is its **built-in explainability**. For every assessment, the system provides:
-
-1. **List of Fired Drools Rules**
-2. **Identified Risk Areas**, such as:
-
-   * “DSCR below recommended threshold”
-   * “High leverage risk (D/E > 2.0)”
-   * “Weak profitability trend”
-3. **Concrete Improvement Targets**, such as:
-
-   * “Improve Current Ratio to ≥ 1.5”
-   * “Reduce Debt-to-Equity below 2.0”
-   * “Increase DSCR above 1.25”
-4. **Traceable Decision Path**, showing how intermediate conclusions led to the final outcome.
-
-This makes the system suitable for **audit, compliance, and credit analyst training**.
+- Rule-based credit assessment using Drools
+- Fully explainable decision reasoning
+- Multi-dimensional financial risk scoring
+- Automated PDF report generation
+- Interactive web dashboard
+- Production deployment on AWS EC2
+- Protected by ModSecurity WAF
+- Deterministic and audit-compliant logic
 
 ---
 
-## 🖥️ User Interface (Thymeleaf Dashboard)
+## 🏗️ System Architecture
 
-The web-based dashboard provides:
+```mermaid
+flowchart LR
 
-* Guided data input for MSMEs
-* Real-time validation feedback
-* Visual risk summary across dimensions
-* Clear decision display (APPROVE / CONDITIONAL / REJECT / REFER)
-* Actionable recommendations panel
+    User[MSME User]
 
-### PDF Report Generation
+    Browser[Web Browser UI<br>Thymeleaf Dashboard]
 
-Users can download a structured PDF report containing:
+    WAF[ModSecurity Web Application Firewall<br>NGINX + OWASP CRS]
 
-* Business profile summary
-* Computed financial ratios
-* Risk scores across dimensions
-* Fired rules summary
-* Identified gaps & improvement plan
-* Final decision classification
+    AWS[AWS EC2 Production Server]
 
-This makes the tool suitable for sharing with accountants, consultants, or lenders.
+    AppService[Spring Boot Application Service<br>User Input Processing<br>Risk Evaluation Orchestration<br>PDF Generation]
+
+    RuleEngine[Drools Rule Engine<br>Forward Chaining Inference<br>Stateless Knowledge Session]
+
+    PDF[Generated PDF Report]
+
+    User --> Browser
+
+    Browser --> WAF
+
+    WAF --> AWS
+
+    AWS --> AppService
+
+    AppService --> RuleEngine
+
+    RuleEngine --> AppService
+
+    AppService --> PDF
+
+    AppService --> Browser
+
+    Browser --> User
+
+````
 
 ---
 
-## ⚙️ Installation & Setup
+## ⚙️ Architecture Explanation
+
+### User Layer
+
+* MSME enters business and financial information
+* Accesses system via secure web interface
+
+### Application Layer (Spring Boot)
+
+Handles:
+
+* User input validation
+* Data processing
+* Rule engine integration
+* PDF report generation
+* Dashboard rendering
+
+### Rule Engine Layer (Drools)
+
+Core decision engine:
+
+* Executes 70+ credit assessment rules
+* Uses forward chaining inference
+* Applies salience-based execution priority
+* Generates explainable decisions
+
+
+### Infrastructure Layer (AWS EC2 + ModSecurity WAF)
+
+Provides:
+
+* Production hosting
+* Secure internet access
+* Protection against attacks
+* Real-world deployment capability
+
+---
+
+## 🧠 Rule Engine Architecture
+
+The Drools rule base is organized into 14 logical modules:
+
+| Module           | Purpose                     |
+| ---------------- | --------------------------- |
+| Data Validation  | Ensures input completeness  |
+| Eligibility      | Business eligibility checks |
+| Liquidity        | Current Ratio analysis      |
+| Solvency         | Debt-to-Equity evaluation   |
+| Cash Flow        | DSCR analysis               |
+| Profitability    | ROE and margin analysis     |
+| Compliance       | Regulatory checks           |
+| Credit Behavior  | Payment history analysis    |
+| Sector Risk      | Industry risk evaluation    |
+| Operational Risk | Stability analysis          |
+| Risk Aggregation | Multi-factor scoring        |
+| Decision Rules   | Final classification        |
+
+---
+
+## 📊 Decision Outcomes
+
+The system produces one of four outcomes:
+
+| Decision            | Meaning                            |
+| ------------------- | ---------------------------------- |
+| APPROVE             | Low risk, strong financial profile |
+| CONDITIONAL_APPROVE | Moderate risk, improvements needed |
+| REJECT              | High financial or compliance risk  |
+| REFER               | Requires human review              |
+
+---
+
+## 🔍 Explainability (Key Differentiator)
+
+The system provides full reasoning transparency:
+
+* List of fired Drools rules
+* Identified financial weaknesses
+* Risk score breakdown
+* Improvement recommendations
+* Traceable decision path
+
+This ensures:
+
+* Audit compliance
+* Regulatory alignment
+* Analyst-level explainability
+
+---
+
+## 📄 PDF Report Generation
+
+Automatically generates professional reports containing:
+
+* Financial ratio analysis
+* Risk scores
+* Decision classification
+* Improvement recommendations
+* Rule execution summary
+
+Suitable for:
+
+* Bank submission
+* Consultant review
+* Internal financial planning
+
+---
+
+## 🧱 Tech Stack
+
+| Layer       | Technology      |
+| ----------- | --------------- |
+| Backend     | Spring Boot     |
+| Language    | Java 17         |
+| Rule Engine | Drools          |
+| Frontend    | Thymeleaf       |
+| Database    | PostgreSQL      |
+| Build Tool  | Maven           |
+| Cloud       | AWS EC2         |
+| Security    | ModSecurity WAF |
+| Reporting   | PDF Generation  |
+
+---
+
+## ☁️ Production Deployment Architecture
+
+Production environment includes:
+
+* AWS EC2 hosting
+* Public domain access
+* ModSecurity Web Application Firewall protection
+* Secure HTTP access
+* Persistent backend service
+
+This demonstrates real-world deployment capability.
+
+---
+
+## 🚀 Local Installation
 
 ### Prerequisites
 
 * Java 17
-* Maven 3.8+
-* Git
+* Maven
+* PostgreSQL
 
-### Build & Run Locally
+---
 
-```sh
+### Clone Repository
+
+```bash
 git clone https://github.com/your-repo/msme-loan-assessment.git
+
 cd msme-loan-assessment
+```
+
+---
+
+### Run Application
+
+```bash
 mvn clean install
+
 mvn spring-boot:run
 ```
 
-Access the application at:
+Access:
 
 ```
 http://localhost:8080
@@ -193,81 +294,63 @@ http://localhost:8080
 
 ---
 
-## ☁️ Cloud Deployment (AWS)
-
-The application is deployed on:
-
-* **AWS EC2** — for scalable, publicly accessible hosting
-* **AWS WAF** — for enhanced security and protection against malicious web traffic
-
-This demonstrates end-to-end capability from development to secure cloud deployment.
-
----
-
 ## 🧪 Testing
 
-The project includes:
+Run tests:
 
-### Unit Tests
-
-* Financial ratio calculations:
-
-  * DSCR
-  * Debt-to-Equity (D/E)
-  * Current Ratio
-  * ROE
-  * Net Profit Margin (NPM)
-
-### Drools Rule Tests
-
-* Validation of critical decision paths
-* Boundary testing for threshold values
-
-### Integration Tests
-
-* End-to-end assessment workflow
-* PDF report generation validation
-
-Run tests using:
-
-```sh
+```bash
 mvn test
 ```
+
+Includes:
+
+* Unit tests
+* Rule engine tests
+* Integration tests
 
 ---
 
 ## 📌 Use Cases
 
-* MSME self-assessment before bank application
-* Financial consultants performing readiness checks
-* Banks simulating preliminary screening
-* Training tool for junior credit analysts
-* Compliance & audit demonstration
+* MSME loan readiness assessment
+* Credit analyst training tool
+* Financial consulting tool
+* Banking pre-screening system
+* Regulatory compliance demonstration
 
 ---
 
-## 🔐 Compliance & Security
+## 🔐 Security
 
-* No mandatory collection of highly sensitive personal data
-* Input validation before rule execution
-* Explainability logs maintained for traceability
-* Decision logic aligned with **RBI MSME lending principles**
-* Deterministic, auditable reasoning (no black-box AI)
-* Protected by **AWS WAF** in production
+Protected using:
+
+* ModSecurity Web Application Firewall
+* Input validation
+* Secure server deployment on AWS EC2
 
 ---
 
-## 🚀 Future Enhancements
+## 🔮 Future Enhancements
 
-* Enhanced analytics on the dashboard
-* “What-if” scenario simulation (e.g., impact of improving DSCR)
+* What-if scenario simulation
+* Advanced analytics dashboard
 * Sector-specific rule modules
-* Configurable thresholds via external rule repository
-* Integration with accounting tools (Tally, Zoho Books)
-* Role-based access for consultants and advisors
+* External rule management system
+* Accounting software integration
 
 ---
 
-## 📧 Contact
+## 👨‍💻 Author
 
-For queries, contributions, or collaboration, feel free to reach out via the repository issues section.
+Vasan S P
+
+GitHub: [https://github.com/vasan12sp](https://github.com/vasan12sp)
+
+Live System: [https://msmeloancheck.me](https://msmeloancheck.me)
+
+---
+
+## 📄 License
+
+MIT License
+
